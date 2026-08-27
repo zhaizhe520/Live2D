@@ -1,5 +1,3 @@
-
-  
 <details>
 <summary>安装准备</summary>
 
@@ -148,3 +146,5 @@ onUnmounted(()=>{
 
 
 </details>
+
+![效果预览图](./docs/images/Live2D.png)
