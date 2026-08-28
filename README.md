@@ -105,7 +105,7 @@ const wrap = ref(null)
 let app = null
 //挂载 做异步等请求
 onMounted(async () => {
-  // ✅不要把div当view！不写view，pixi自动生成canvas
+  // ✅不要把div当view！不写view，pixi自动生成canvas 异步创建app应用
   app = new PIXI.Application({
     width: 1000,
     height: 1000,
@@ -113,7 +113,7 @@ onMounted(async () => {
   })
   // 将pixi自动创建的canvas DOM挂载到div里面
   wrap.value.appendChild(app.view)
-  // xxx.model3.json 同步加载
+  // xxx.model3.json 同步等待加载
   const model = await Live2DModel.from('/live2d/xxx/xxx.model3.json')
   app.stage.addChild(model)
   // --------【在这里调，反复修改数字看效果】--------
@@ -138,13 +138,24 @@ onUnmounted(()=>{
 
 <details>
 <summary>生产环境的小建议</summary>
+
 加载 Live2D 属于异步网络请求 
 
 如果用户的网速较慢或资源文件较大，网页会有一段时间的“空白等待期”。
 
-在实际项目中，通常建议在异步加载前后加上 Loading 加载动画
+在实际项目中，通常建议在异步加载前后加上 Loading 加载动画  `异步async false  await true `
+
+</details>
+
+<details>
+<summary>字符串绑定DOM元素实现打字效果</summary>
+
+
 
 
 </details>
+
+
+
 
 ![效果预览图](./docs/images/Live2D.png)
