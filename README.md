@@ -81,7 +81,7 @@ PixiJS和  pixi-live2d-display 连通性 会不会库不兼容
 
 ```
 import * as PIXI from 'pixi.js';
-///cubism4 是什么玩意
+///cubism4 第4代核心
 import { Live2DModel } from 'pixi-live2d-display/cubism4';  //第4代 其他几代底层渲染逻辑和数据结构相差很大
 console.log('Pixi版本:', PIXI.VERSION);
 console.log('Live2D模型类:', Live2DModel);
@@ -139,13 +139,13 @@ onUnmounted(()=>{
 
 
 <details>
-<summary>指针事件实现拖动</summary>
+<summary>拖拽移动</summary>
 
 `v5 / v6 (当前使用的版本)	event.data.global.x / event.data.global.y`
 
 `v7/v8  pointerdown、pointermove、pointerup 等`
 
-大致源码的实现效果,具体的请看开发环境
+大致源码的实现效果,具体的请看开发环境和PixiJS版本
 
 ```
   
@@ -182,7 +182,7 @@ onUnmounted(()=>{
       longPressTimer = setTimeout(() => {
         if (isDragging) {
           isLongPress = true
-          console.log('触发长按事件！可以在这里播放动画或语音')
+          console.log('触发长按！')
           // model.motion('TapBody') // 如果模型支持，可触发动作
         }
       }, 800)
@@ -236,16 +236,73 @@ onUnmounted(()=>{
 
 </details>
 
+
 <details>
-<summary>生产环境的小建议</summary>
+<summary>窗口自适应与自动监听缩放画布</summary>
 
-加载 Live2D 属于异步网络请求 
+live2d的布局位置最怕写死固定
 
-如果用户的网速较慢或资源文件较大，网页会有一段时间的“空白等待期”。
+//handleResize() 自定义函数 实现resize监听事件
+```
+// 窗口大小改变时的适配函数
+const handleResize = () => {
+  if (!app) return
 
-在实际项目中，通常建议在异步加载前后加上 Loading 加载动画  `异步async false  await true `
+  // 1. 获取当前屏幕的实时宽高
+  const width = window.innerWidth
+  const height = window.innerHeight
+
+  // 核心:动态调整 Pixi 画布的像素大小（重画纸）
+  app.renderer.resize(width, height)
+}
+```
+
+//挂载时两量监听浏览器窗口
+```
+onMounted(async()=>{
+  const width = window.innerWidth
+  const height = window.innerHeight
+})
+```
+
+```
+// 应用挂载时候 是实时宽高
+ app = new PIXI.Application({
+    width: width,
+    height: height
+  })
+
+// 不能固定死 model舞台设置 try 同步刷新时候 固定位置 不至于乱跑
+    model.x = width * 0.8
+    model.y = height * 0.75
+```
+最后 核心 监听浏览器 resize 事件 `window.addEventListener('resize', handleResize)`
+
+最后的最后 unMounted 销毁一下 防止内存溢出
+</details>
+
+<details>
+<summary>边缘碰撞检测（Boundary Limit）</summary>
+
 
 </details>
+
+<details>
+<summary>气泡方向自适应</summary>
+
+
+</details>
+
+<details>
+<summary>接入LLM/agent</summary>
+
+
+</details>
+
+
+
+
+
 
 
 ![效果预览图](./docs/images/Live2D.png)

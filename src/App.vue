@@ -1,7 +1,8 @@
 <template>
     <section>
-        <div><live2d/></div>
-        <div class="dom">指定DOM</div>
+        <div class="">
+            <live2d/>
+        </div>
     </section>
 </template>
 
