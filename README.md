@@ -136,6 +136,106 @@ onUnmounted(()=>{
 ```
 </details>
 
+
+
+<details>
+<summary>指针事件实现拖动</summary>
+
+`v5 / v6 (当前使用的版本)	event.data.global.x / event.data.global.y`
+
+`v7/v8  pointerdown、pointermove、pointerup 等`
+
+大致源码的实现效果,具体的请看开发环境
+
+```
+  
+  try{
+    //导入模型
+    const model = await Live2DModel.from("")
+    //舞台
+    app.stage.addChild(model)
+
+    // ==================== PixiJS v6.x 交互 ====================
+    
+    // 1. PixiJS v6 开启交互开关的标准写法
+    model.interactive = true //开启交互
+    model.buttonMode = true // 在 v6 里开启鼠标悬浮手型光标
+
+    // 状态控制变量
+    let isDragging = false
+    let dragOffsetX = 0
+    let dragOffsetY = 0
+    let longPressTimer = null
+    let isLongPress = false
+
+    // 指针按下（点击/拖拽开始）
+    model.on('pointerdown', (event) => {
+      isDragging = true
+      isLongPress = false
+
+      // ✅ PixiJS v6 核心点：从 event.data.global 获取坐标
+      const { x, y } = event.data.global
+      dragOffsetX = x - model.x
+      dragOffsetY = y - model.y
+
+      // 长按定时器（800ms 阈值） 
+      longPressTimer = setTimeout(() => {
+        if (isDragging) {
+          isLongPress = true
+          console.log('触发长按事件！可以在这里播放动画或语音')
+          // model.motion('TapBody') // 如果模型支持，可触发动作
+        }
+      }, 800)
+    })
+
+    // 指针移动（拖拽中）
+    model.on('pointermove', (event) => {
+      if (isDragging) {
+        // ✅ PixiJS v6 核心点：从 event.data.global 获取坐标
+        const { x, y } = event.data.global
+        model.x = x - dragOffsetX
+        model.y = y - dragOffsetY
+      }
+    })
+
+    // 拖拽结束/抬起处理函数 
+    const onDragEnd = () => {
+      if (!isDragging) return
+
+      // 清除长按计时 防止内存溢出
+      clearTimeout(longPressTimer)
+
+      // 如果未触发长按，则判定为普通短按点击
+      if (!isLongPress) {
+        console.log('普通点击！')
+      }
+
+      isDragging = false
+      isLongPress = false
+    }
+
+    // 绑定抬起与移出区域事件，防止“漏抬”
+    model.on('pointerup', onDragEnd)
+    model.on('pointerupoutside', onDragEnd)
+
+    // =============================================================
+  }catch(error){
+    console.error("模型移动加载失败",error)
+  }
+
+```
+</details>
+
+
+
+<details>
+<summary>字符串绑定DOM元素实现打字效果</summary>
+
+
+
+
+</details>
+
 <details>
 <summary>生产环境的小建议</summary>
 
@@ -146,16 +246,6 @@ onUnmounted(()=>{
 在实际项目中，通常建议在异步加载前后加上 Loading 加载动画  `异步async false  await true `
 
 </details>
-
-<details>
-<summary>字符串绑定DOM元素实现打字效果</summary>
-
-
-
-
-</details>
-
-
 
 
 ![效果预览图](./docs/images/Live2D.png)

@@ -1,43 +1,123 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import * as PIXI from 'pixi.js'
-// 重点！！先挂载全局PIXI，再导入cubism4
+// 重点！！先挂载全局 PIXI，再导入 cubism4
 window.PIXI = PIXI
 import { Live2DModel } from 'pixi-live2d-display/cubism4'
 
 const wrap = ref(null)
-
 let app = null
 
 onMounted(async () => {
-  // ✅不要把div当view！不写view，pixi自动生成canvas
+  // PIXI.VERSION 版本记录 不同版本 交互逻辑好底层结构发生了很大的变化
+  console.log('当前使用的 PixiJS 版本:',)
+  // 创建APP canvas画布大小
   app = new PIXI.Application({
-    width: 400,
+    width: 1000,
     height: 600,
     backgroundAlpha: 1
   })
-  // 将pixi自动创建的canvas DOM挂载到div里面
+  //响应式渲染canvas到div dom元素里面
   wrap.value.appendChild(app.view)
 
-  const model = await Live2DModel.from('/live2d/murasame/murasame.model3.json')
-  app.stage.addChild(model)
-  // --------【在这里调，反复修改数字看效果】--------
-  model.anchor.set(0, 0) // ✅定位基准切换到模型中心
+  try {
+    const model = await Live2DModel.from('/live2d/murasame/murasame.model3.json')
+    app.stage.addChild(model)
+    //默认 Hit Area（碰撞检测区域）与 Motion（动作）绑定逻辑 pixi-live2d-display/cubism4 
 
-  model.scale.set(0.15)   // 整体大小 0.2倍
-  // model.scale.x = 0.22 // 如果你想单独横向加宽，打开这个
-  // model.scale.y = 0.20 // 单独纵向拉高
+    //模型的视线聚焦函数清空 
+    //model.focus = () => {}
 
-  model.x = 200;   // 左右：画布宽800，400就是水平居中；加大往右，减小往左
-  model.y = 100;   // 上下：画布高600，300就是垂直居中；加大往下，减小往上
-  // ------------------------------------------------
+    model.anchor.set(0.5, 0.5) // ✅ 拖拽建议将锚点设为中心点
+    model.scale.set(0.15)
+    model.x = 200
+    model.y = 300
+
+    // ==================== PixiJS v6.x 交互 ====================
+    
+    // 1. PixiJS v6 开启交互开关的标准写法
+    model.interactive = true
+    model.buttonMode = true // 在 v6 里开启鼠标悬浮手型光标
+
+
+    // 状态控制变量
+    let isDragging = false
+    let dragOffsetX = 0
+    let dragOffsetY = 0
+    let longPressTimer = null
+    let isLongPress = false
+
+    // 指针按下（点击/拖拽开始）
+    model.on('pointerdown', (event) => {
+      isDragging = true
+      isLongPress = false
+
+      // ✅ PixiJS v6 核心点：从 event.data.global 获取坐标
+      const { x, y } = event.data.global
+      dragOffsetX = x - model.x
+      dragOffsetY = y - model.y
+
+      // 长按定时器（800ms 阈值）
+      longPressTimer = setTimeout(() => {
+        if (isDragging) {
+          isLongPress = true
+          console.log('长按')
+          // model.motion('TapBody') // 如果模型支持，可触发动作
+        }
+      }, 800)
+    })
+
+    // 指针移动（拖拽中）
+    model.on('pointermove', (event) => {
+      if (isDragging) {
+        // ✅ PixiJS v6 核心点：从 event.data.global 获取坐标
+        const { x, y } = event.data.global
+        model.x = x - dragOffsetX
+        model.y = y - dragOffsetY
+      }
+    })
+
+    // 拖拽结束/抬起处理函数
+    const onDragEnd = () => {
+      if (!isDragging) return
+
+      // 清除长按计时
+      clearTimeout(longPressTimer)
+
+      // 如果未触发长按，则判定为普通短按点击
+      if (!isLongPress) {
+        console.log('点击事件')
+      }
+
+      isDragging = false
+      isLongPress = false
+    }
+
+    // 绑定抬起与移出区域事件，防止“漏抬”
+    model.on('pointerup', onDragEnd)
+    model.on('pointerupoutside', onDragEnd)
+
+    // =============================================================
+
+  } catch (error) {
+    console.error('Live2D 模型加载失败:', error)
+  }
 })
 
-onUnmounted(()=>{
+onUnmounted(() => {
   app?.destroy(true)
 })
 </script>
 
 <template>
-  <div ref="wrap" style="width:400px;height:600px;"></div>
+  <div ref="wrap" style="width:100%;height:100vh;position:relative;"></div>
 </template>
+
+<style scoped>
+/*清除内边距*/
+body{
+  margin:0;
+  padding:0;
+}
+
+</style>
