@@ -136,6 +136,60 @@ onUnmounted(()=>{
 ```
 </details>
 
+<details>
+<summary>窗口自适应与自动监听缩放画布</summary>
+
+live2d的布局位置最怕写死固定
+
+//handleResize() 自定义函数 实现resize监听事件
+```
+// 窗口大小改变时的适配函数
+const handleResize = () => {
+  if (!app) return
+
+  // 1. 获取当前屏幕的实时宽高
+  const width = window.innerWidth
+  const height = window.innerHeight
+
+  // 核心:动态调整 Pixi 画布的像素大小（重画纸）
+  app.renderer.resize(width, height)
+}
+```
+
+//挂载时两量监听浏览器窗口
+```
+onMounted(async()=>{
+  const width = window.innerWidth
+  const height = window.innerHeight
+})
+```
+
+```
+// 应用挂载时候 是实时宽高
+ app = new PIXI.Application({
+    width: width,
+    height: height
+  })
+```
+// 不能固定死 try model舞台设置  同步刷新时候 固定位置 不至于乱跑
+```
+    model.x = width * 0.8
+    model.y = height * 0.75
+```
+最后 核心 监听浏览器 resize 事件 `window.addEventListener('resize', handleResize)`
+
+最后的最后 unMounted 销毁一下 防止内存溢出
+
+*存在问题*
+
+每次缩小浏览器视窗 canvas画布 不会随着改变(或许改变了,不对啊，改变了为什么live2d还能再外面,没碰撞边界的问题？ ) 导致 live2d模型可能在已缩放的视窗外面 必须刷新才能解决 难道每次移动之后都要实现浏览器的刷新吗？
+
+放大没有问题因为 `app.renderer.resize(width, height)` 监听事件会扩大画布的大小，可以自行移动到合适的位置 是不是没有碰撞边界的问题 希望这个需求可以解决
+
+
+
+
+</details>
 
 
 <details>
@@ -227,7 +281,6 @@ onUnmounted(()=>{
 </details>
 
 
-
 <details>
 <summary>字符串绑定DOM元素实现打字效果</summary>
 
@@ -236,50 +289,12 @@ onUnmounted(()=>{
 
 </details>
 
-
 <details>
-<summary>窗口自适应与自动监听缩放画布</summary>
+<summary>DOM元素绑定对应表情</summary>
 
-live2d的布局位置最怕写死固定
 
-//handleResize() 自定义函数 实现resize监听事件
-```
-// 窗口大小改变时的适配函数
-const handleResize = () => {
-  if (!app) return
-
-  // 1. 获取当前屏幕的实时宽高
-  const width = window.innerWidth
-  const height = window.innerHeight
-
-  // 核心:动态调整 Pixi 画布的像素大小（重画纸）
-  app.renderer.resize(width, height)
-}
-```
-
-//挂载时两量监听浏览器窗口
-```
-onMounted(async()=>{
-  const width = window.innerWidth
-  const height = window.innerHeight
-})
-```
-
-```
-// 应用挂载时候 是实时宽高
- app = new PIXI.Application({
-    width: width,
-    height: height
-  })
-
-// 不能固定死 model舞台设置 try 同步刷新时候 固定位置 不至于乱跑
-    model.x = width * 0.8
-    model.y = height * 0.75
-```
-最后 核心 监听浏览器 resize 事件 `window.addEventListener('resize', handleResize)`
-
-最后的最后 unMounted 销毁一下 防止内存溢出
 </details>
+
 
 <details>
 <summary>边缘碰撞检测（Boundary Limit）</summary>
@@ -297,7 +312,30 @@ onMounted(async()=>{
 <summary>接入LLM/agent</summary>
 
 
+<details>
+<summary>结合 TTS(语音合成)</summary>
+
+
 </details>
+
+<details>
+<summary>流式传输(SSE / Stream Output)对应嘴型</summary>
+
+
+</details>
+<details>
+<summary>Agent Function Calling(工具调用)</summary>
+
+
+</details>
+<details>
+<summary>加载角色对应Skills</summary>
+
+
+</details>
+
+</details>
+
 
 
 
