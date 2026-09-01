@@ -32,6 +32,7 @@ onMounted(async () => {
     height: height,
     backgroundAlpha: 0
   })
+   
   //响应式渲染canvas到div dom元素里面
   wrap.value.appendChild(app.view)
 

@@ -79,6 +79,7 @@ public/
 
 PixiJS和  pixi-live2d-display 连通性 会不会库不兼容
 
+试着打印一下
 ```
 import * as PIXI from 'pixi.js';
 ///cubism4 第4代核心
@@ -100,6 +101,7 @@ import * as PIXI from 'pixi.js'
 window.PIXI = PIXI
 import { Live2DModel } from 'pixi-live2d-display/cubism4'
 
+//wrap 变量 响应式 塞入 div 容器
 const wrap = ref(null)
 
 let app = null
@@ -113,9 +115,11 @@ onMounted(async () => {
   })
   // 将pixi自动创建的canvas DOM挂载到div里面
   wrap.value.appendChild(app.view)
+
   // xxx.model3.json 同步等待加载
   const model = await Live2DModel.from('/live2d/xxx/xxx.model3.json')
   app.stage.addChild(model)
+
   // --------【在这里调，反复修改数字看效果】--------
   model.anchor.set(0, 0) // ✅定位基准切换到模型中心
 
@@ -193,9 +197,11 @@ onMounted(async()=>{
 
 
 <details>
-<summary>拖拽移动</summary>
+<summary>拖拽移动event.data.global</summary>
 
-`v5 / v6 (当前使用的版本)	event.data.global.x / event.data.global.y`
+专有的事件数据对象
+
+`v5 / v6 (当前使用的版本)	event.data.global.x / event.data.global.y` 
 
 `v7/v8  pointerdown、pointermove、pointerup 等`
 
@@ -216,11 +222,17 @@ onMounted(async()=>{
     model.buttonMode = true // 在 v6 里开启鼠标悬浮手型光标
 
     // 状态控制变量
+    //是否正在拖拽
     let isDragging = false
+    //拖拽坐标偏移量
     let dragOffsetX = 0
     let dragOffsetY = 0
+    //长按定时器
     let longPressTimer = null
+    是否触发了长按
     let isLongPress = false
+    
+    //model.on('事件名', (event) => { ... }) 事件监听语法
 
     // 指针按下（点击/拖拽开始）
     model.on('pointerdown', (event) => {
@@ -229,6 +241,8 @@ onMounted(async()=>{
 
       // ✅ PixiJS v6 核心点：从 event.data.global 获取坐标
       const { x, y } = event.data.global
+
+      //偏差量（Offset） 防止拖动过程中 模型瞬移 没有拖拽过程
       dragOffsetX = x - model.x
       dragOffsetY = y - model.y
 
