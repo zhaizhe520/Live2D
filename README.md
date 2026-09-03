@@ -1,3 +1,6 @@
+参考文献
+`https://github.com/guansss/pixi-live2d-display`
+
 <details>
 <summary>安装准备</summary>
 
@@ -294,11 +297,21 @@ onMounted(async()=>{
 ```
 </details>
 
+<details>
+<summary>气泡方向自适应</summary>
+
+*先让气泡“死死粘着”模型*
+
+//先把坐标传给 Vue，让气泡跟着跑起来
+`modelPos.value = { x: newX, y: newY }`
+
+*上下翻转*
+
+
+</details>
 
 <details>
 <summary>字符串绑定DOM元素实现打字效果</summary>
-
-
 
 
 </details>
@@ -312,12 +325,6 @@ onMounted(async()=>{
 
 <details>
 <summary>边缘碰撞检测（Boundary Limit）</summary>
-
-
-</details>
-
-<details>
-<summary>气泡方向自适应</summary>
 
 
 </details>

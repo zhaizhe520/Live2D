@@ -1,12 +1,14 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted,computed} from 'vue'
 import * as PIXI from 'pixi.js'
 // 重点！！先挂载全局 PIXI，再导入 cubism4
 window.PIXI = PIXI
 import { Live2DModel } from 'pixi-live2d-display/cubism4'
-
+//容器变量
 const wrap = ref(null)
+// app 舞台
 let app = null
+
 // 窗口大小改变时的适配函数
 const handleResize = () => {
   if (!app ) return
@@ -18,9 +20,7 @@ const handleResize = () => {
   // 2. 动态调整 Pixi 画布的像素大小（重画纸） 画纸不够大了 添加实时画纸
   app.renderer.resize(width, height)  
 }
-
-
-
+//DOM 挂载时
 onMounted(async () => {
   // PIXI.VERSION 版本记录 不同版本 交互逻辑好底层结构发生了很大的变化
   console.log('当前使用的 PixiJS 版本:',)
@@ -120,16 +120,40 @@ onMounted(async () => {
   }
   // 核心 2：监听浏览器 resize 事件 自动扩大
   window.addEventListener('resize', handleResize)
+  
 })
-
+//DOM 销毁时
 onUnmounted(() => {
   app?.destroy(true)
   window.removeEventListener('resize', handleResize)
 })
+
+
+// 气泡默认坐标
+const dialogText = ref("sb")
+//气泡设计 生命周期挂载时
+const modelPos = computed(() => {
+  return {
+    x: window.innerWidth * 0.8,
+    y: window.innerHeight * 0.75
+  }
+})
+
 </script>
 
 <template>
-  <div ref="wrap"  class="live2d-contain"></div>
+  <!-- 父容器：跟随 Live2D 模型的物理坐标定位 -->
+  <div 
+    ref="wrap" 
+    class="live2d-contain"
+    :style="TODO"
+  >
+    <!-- 动态气泡： -->
+    <div class="dialog" :style="{ left: `${modelPos.x}px`, top: `${modelPos.y-150}px` }" >
+      {{ dialogText }}
+    </div>
+  </div>
+
   <div class="dom">指定DOM</div>
 </template>
 
@@ -149,7 +173,20 @@ body{
   overflow: hidden;
   z-index: 2;
 }
+/**背景框 气泡移动位置差距过大 */
+.dialog {
+  width: 200px;
+  height: 60px;
+  position: absolute;
+  padding: 10px 16px;
+  background: rgba(239, 187, 187, 0.9);
+  border-radius: 8px;
+  white-space: nowrap;
+  z-index: -1;
 
+  /* 这样气泡的右下角，就精准对齐在模型的 (x, y) 坐标了！ */
+  transform: translate(-100%, -100%) translate(-10px, -10px);
+}
 .dom{
   width: 100px;
   height: 30px;
