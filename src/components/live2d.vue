@@ -129,16 +129,15 @@ onUnmounted(() => {
 })
 
 
-// 气泡默认坐标
-const dialogText = ref("sb")
-//气泡设计 生命周期挂载时
-const modelPos = computed(() => {
-  return {
-    x: window.innerWidth * 0.8,
-    y: window.innerHeight * 0.75
-  }
-})
 
+
+//气泡坐标为模型中心
+const modelPos = {
+  x: window.innerWidth * 0.8,
+  y: window.innerHeight * 0.75
+}
+// 气泡默认坐标
+const dialogText = ref("固定气泡")
 </script>
 
 <template>
@@ -148,7 +147,7 @@ const modelPos = computed(() => {
     class="live2d-contain"
     :style="TODO"
   >
-    <!-- 动态气泡： -->
+    <!-- 动态气泡：气泡位置中心向上150计量单位 `modelPos.y-150`-->
     <div class="dialog" :style="{ left: `${modelPos.x}px`, top: `${modelPos.y-150}px` }" >
       {{ dialogText }}
     </div>
@@ -193,5 +192,4 @@ body{
   background-color: rgb(20, 124, 215);
 
 }
-
 </style>
