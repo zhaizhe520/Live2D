@@ -298,14 +298,25 @@ onMounted(async()=>{
 </details>
 
 <details>
-<summary>气泡方向自适应</summary>
+<summary>气泡</summary>
 
 *先让气泡“死死粘着”模型*
 
-//先把坐标传给 Vue，让气泡跟着跑起来
-`modelPos.value = { x: newX, y: newY }`
+```
+//先把画布坐标传给 Vue，让气泡固定模型中心 || 动态赋予 可随着 live2d一起移动
+const modelPos =ref({x: window.innerWidth * 0.8,y: window.innerHeight * 0.75})
+```
+```
+//气泡容器 中心向上 150 计量单位 具体位置参考具体模型
+<div class="dialog" :style="{ left: `${modelPos.x}px`, top: `${modelPos.y-150}px` }" ></div>
+```
 
-*上下翻转*
+*一起移动*
+
+pointermove 拖拽时 赋值 modelPos.value
+
+`modelPos.value = { x: model.x, y: model.y }`即可
+
 
 
 </details>
@@ -364,4 +375,5 @@ onMounted(async()=>{
 
 
 
-![效果预览图](./docs/images/Live2D.png)
+![效果预览图](./docs/images/Live2D.png) ![气泡预览图](./docs/images/Live2dDOM.png)
+

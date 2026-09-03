@@ -19,6 +19,7 @@ const handleResize = () => {
 
   // 2. 动态调整 Pixi 画布的像素大小（重画纸） 画纸不够大了 添加实时画纸
   app.renderer.resize(width, height)  
+  TODO
 }
 //DOM 挂载时
 onMounted(async () => {
@@ -90,9 +91,10 @@ onMounted(async () => {
         const { x, y } = event.data.global
         model.x = x - dragOffsetX
         model.y = y - dragOffsetY
+        //谁live2d一起移动
+        modelPos.value = { x: model.x, y: model.y }
       }
     })
-
     // 拖拽结束/抬起处理函数
     const onDragEnd = () => {
       if (!isDragging) return
@@ -132,12 +134,9 @@ onUnmounted(() => {
 
 
 //气泡坐标为模型中心
-const modelPos = {
-  x: window.innerWidth * 0.8,
-  y: window.innerHeight * 0.75
-}
+const modelPos = ref({ x: window.innerWidth * 0.8, y: window.innerHeight * 0.75 })
 // 气泡默认坐标
-const dialogText = ref("固定气泡")
+const dialogText = ref("Ciallo～(∠・ω< )⌒☆")
 </script>
 
 <template>
@@ -148,7 +147,7 @@ const dialogText = ref("固定气泡")
     :style="TODO"
   >
     <!-- 动态气泡：气泡位置中心向上150计量单位 `modelPos.y-150`-->
-    <div class="dialog" :style="{ left: `${modelPos.x}px`, top: `${modelPos.y-150}px` }" >
+    <div class="dialog" :style="{ left: `${modelPos.x+80}px`, top: `${modelPos.y-200}px` }">
       {{ dialogText }}
     </div>
   </div>
@@ -175,10 +174,15 @@ body{
 /**背景框 气泡移动位置差距过大 */
 .dialog {
   width: 200px;
-  height: 60px;
+  height: 80px;
+   
+  display: flex;
+  justify-content: center;
+  align-items: center;
   position: absolute;
   padding: 10px 16px;
-  background: rgba(239, 187, 187, 0.9);
+  background: rgba(203, 242, 158, 0.9);
+  color: pink;
   border-radius: 8px;
   white-space: nowrap;
   z-index: -1;
@@ -186,6 +190,7 @@ body{
   /* 这样气泡的右下角，就精准对齐在模型的 (x, y) 坐标了！ */
   transform: translate(-100%, -100%) translate(-10px, -10px);
 }
+
 .dom{
   width: 100px;
   height: 30px;
