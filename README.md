@@ -1,4 +1,4 @@
-参考文献
+参考仓库
 `https://github.com/guansss/pixi-live2d-display`
 
 <details>
@@ -303,7 +303,7 @@ onMounted(async()=>{
 *先让气泡“死死粘着”模型*
 
 ```
-//先把画布坐标传给 Vue，让气泡固定模型中心 || 动态赋予 可随着 live2d一起移动
+//先把画布坐标传给 Vue，让气泡固定模型中心 || 动态赋予ref() 可随着 live2d一起移动
 const modelPos =ref({x: window.innerWidth * 0.8,y: window.innerHeight * 0.75})
 ```
 ```
@@ -313,17 +313,17 @@ const modelPos =ref({x: window.innerWidth * 0.8,y: window.innerHeight * 0.75})
 
 *一起移动*
 
-pointermove 拖拽时 赋值 modelPos.value
+ `pixijs`监听事件里 `pointermove` 赋值 `modelPos.value`
 
 `modelPos.value = { x: model.x, y: model.y }`即可
-
-
 
 </details>
 
 <details>
 <summary>字符串绑定DOM元素实现打字效果</summary>
+指令封装 解耦 每个dom绑定事件 很麻烦
 
+极致的解耦:单文件封装
 
 </details>
 

@@ -152,7 +152,7 @@ const dialogText = ref("Ciallo～(∠・ω< )⌒☆")
     </div>
   </div>
 
-  <div class="dom">指定DOM</div>
+  <div class="dom" v-pet-novel="123">指定DOM</div>
 </template>
 
 <style scoped>
