@@ -7,6 +7,8 @@ export const { displayText: dialogText, typeText } = useTypewriter(50)
 
 const defaultText = ''
 
+//自定义结构类型
+
 interface PetNovelElement extends HTMLElement {
   _handleMouseEnter?: () => void //扩展类型：用来存移入类型
   _handleMouseLeave?: () => void //扩展类型：用来存移出类型
@@ -19,7 +21,7 @@ export const vPetNovel: ObjectDirective<PetNovelElement, string | number> = {
       // 1. 每次移入时，先清除上一次没完成的定时器
       if (el._hoverTimer) clearTimeout(el._hoverTimer)
 
-      // 2. 开启延迟：鼠标停留满 300ms 才会触发打字
+      // 2. 开启延迟：鼠标停留满 x00ms 才会触发打字
       el._hoverTimer = window.setTimeout(() => {
         if (binding.value !== undefined && binding.value !== null) {
           typeText(String(binding.value))

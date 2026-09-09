@@ -134,7 +134,7 @@ onUnmounted(() => {
   window.removeEventListener('resize', handleResize)
 })
 
-
+  
 
 
 //气泡坐标为模型中心

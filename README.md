@@ -294,6 +294,14 @@ onMounted(async()=>{
 ```
 </details>
 
+
+<details>
+<summary>边缘碰撞检测（Boundary Limit）</summary>
+
+
+</details>
+
+
 <details>
 <summary>气泡</summary>
 
@@ -374,7 +382,7 @@ export const vPetNovel: ObjectDirective<PetNovelElement, string | number> = {
 </details>
 
 <details>
-<summary>打字封装TS<summary>
+<summary>封装TS实现打字效果</summary>
 
 跨函数之间的通信 组合式函数 与封装指令文件结合
 
@@ -413,6 +421,11 @@ export function useTypewriter(defaultSpeed = 50) {
 }
 ```
 
+*防抖节流打字*
+
+setTimeout(()=>{函数,200})
+
+
 </details>
 
 
@@ -423,11 +436,6 @@ export function useTypewriter(defaultSpeed = 50) {
 </details>
 
 
-<details>
-<summary>边缘碰撞检测（Boundary Limit）</summary>
-
-
-</details>
 
 <details>
 <summary>接入LLM/agent</summary>
