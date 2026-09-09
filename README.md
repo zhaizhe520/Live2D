@@ -320,11 +320,101 @@ const modelPos =ref({x: window.innerWidth * 0.8,y: window.innerHeight * 0.75})
 <summary>字符串绑定DOM元素实现打字效果</summary>
 指令封装 解耦 每个dom绑定事件 很麻烦
 
-极致的解耦:单文件封装
+极致的解耦:单文件封装 ts文件封装
 
+封装指令的本质就是vue导出一个对象，挂上函数，vue内部在对应的生命周期自动调用这些函数，传入` el、binding、vnode、prevVNode` 参数。
 
+```
+//引入2种数据类型
+import type { ObjectDirective, DirectiveBinding } from 'vue'
+import { ref } from 'vue'
+
+// 1. 全局响应式气泡文本，供 Live2D 组件读取
+export const dialogText = ref<string>('')
+
+const defaultText = ''
+
+// 2. 扩展 HTMLElement 接口，防止 TS 在 DOM 上挂载函数时报错
+interface PetNovelElement extends HTMLElement {
+  _handleMouseEnter?: () => void
+  _handleMouseLeave?: () => void
+}
+
+// 3. 封装 TS 指令对象
+export const vPetNovel: ObjectDirective<PetNovelElement, string | number> = {
+  mounted(el: PetNovelElement, binding: DirectiveBinding<string | number>) {
+    el._handleMouseEnter = () => {
+      console.log('鼠标移入了！传入的值是：', binding.value,'类型为:' ,typeof('binding.value'))
+      if (binding.value !== undefined && binding.value !== null) {
+        dialogText.value = String(binding.value)
+      }
+    }
+
+    el._handleMouseLeave = () => {
+      dialogText.value = defaultText
+    }
+
+    el.addEventListener('mouseenter', el._handleMouseEnter)
+    el.addEventListener('mouseleave', el._handleMouseLeave)
+  },
+
+  unmounted(el: PetNovelElement) {
+    if (el._handleMouseEnter) {
+      el.removeEventListener('mouseenter', el._handleMouseEnter)
+      delete el._handleMouseEnter
+    }
+    if (el._handleMouseLeave) {
+      el.removeEventListener('mouseleave', el._handleMouseLeave)
+      delete el._handleMouseLeave
+    }
+  }
+}
+```
 
 </details>
+
+<details>
+<summary>打字封装TS<summary>
+
+跨函数之间的通信 组合式函数 与封装指令文件结合
+
+```
+import { ref } from 'vue'
+
+export function useTypewriter(defaultSpeed = 50) {
+  // 1. 用于渲染的响应式文本
+  const displayText = ref<string>('')
+  // 2. 内部定时器句柄
+  let timer: number | null = null
+
+  const typeText = (text: string, speed = defaultSpeed) => {
+    // 每次开始新打字前，先清空上一次的定时器
+    if (timer) clearInterval(timer)
+
+    displayText.value = ''
+    
+    let index = 0
+
+    timer = window.setInterval(() => {
+      if (index < text.length) {
+        displayText.value += text.charAt(index)
+        index++
+      } else {
+        if (timer) clearInterval(timer)
+        timer = null
+      }
+    }, speed)
+  }
+
+  return {
+    displayText,
+    typeText
+  }
+}
+```
+
+</details>
+
 
 <details>
 <summary>DOM元素绑定对应表情</summary>

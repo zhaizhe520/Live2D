@@ -154,7 +154,7 @@ const modelPos = ref({ x: window.innerWidth * 0.8, y: window.innerHeight * 0.75 
     </div>
   </div>
 
-  <div class="dom" v-pet-novel="123">指定DOM</div>
+  <div class="dom" v-pet-novel="'Ciallo～(∠・ω< )⌒☆'">指我</div>
 </template>
 
 <style scoped>
@@ -194,7 +194,7 @@ body{
 }
 
 .dom{
-  width: 100px;
+  width: auto;
   height: 30px;
   background-color: rgb(20, 124, 215);
   position: relative;
@@ -202,3 +202,4 @@ body{
   cursor: pointer;
 }
 </style>
+
