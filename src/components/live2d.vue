@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onUnmounted,} from 'vue'
+import { ref, onMounted, onUnmounted, } from 'vue'
 
 // 引入封装好的 TS 文件
 import { vPetNovel, dialogText } from './directives/vPetNovel'
@@ -7,7 +7,10 @@ import { vPetNovel, dialogText } from './directives/vPetNovel'
 import * as PIXI from 'pixi.js'
 // 重点！！先挂载全局 PIXI，再导入 cubism4
 window.PIXI = PIXI
-import { Live2DModel } from 'pixi-live2d-display/cubism4'
+import { Live2DModel, SoundManager, } from 'pixi-live2d-display/cubism4'
+
+import {vPetMotion} from "./directives/vPetMotion.ts"
+
 //容器变量
 const wrap = ref(null)
 // app 舞台
@@ -15,20 +18,20 @@ let app = null
 
 // 窗口大小改变时的适配函数
 const handleResize = () => {
-  if (!app ) return
+  if (!app) return
 
   // 1. 获取当前屏幕的实时宽高
   const width = window.innerWidth
   const height = window.innerHeight
 
   // 2. 动态调整 Pixi 画布的像素大小（重画纸） 画纸不够大了 添加实时画纸
-  app.renderer.resize(width, height)  
+  app.renderer.resize(width, height)
   // TODO: 优化实时监听
 }
 //DOM 挂载时
 onMounted(async () => {
   // PIXI.VERSION 版本记录 不同版本 交互逻辑好底层结构发生了很大的变化
-  console.log('当前使用的 PixiJS 版本:',PIXI.VERSION)
+  console.log('当前使用的 PixiJS 版本:', PIXI.VERSION)
   const width = window.innerWidth
   const height = window.innerHeight
   // 创建APP canvas画布大小
@@ -37,15 +40,32 @@ onMounted(async () => {
     height: height,
     backgroundAlpha: 0
   })
-   
+
   //响应式渲染canvas到div dom元素里面
   wrap.value.appendChild(app.view)
 
   try {
-    const model = await Live2DModel.from('/live2d/murasame/murasame.model3.json')
-    app.stage.addChild(model)
-    //默认 Hit Area（碰撞检测区域）与 Motion（动作）绑定逻辑 pixi-live2d-display/cubism4 
+    const model = await Live2DModel.from('/live2d/murasame/murasame.model3.json');
+    app.stage.addChild(model);
+    //暴露给windows
 
+    window.live2dModel = model;
+
+    //默认 Hit Area（碰撞检测区域）与 Motion（动作）绑定逻辑 pixi-live2d-display/cubism4 
+    model.on('hit', (hitAreaNames) => {
+      // hitAreaNames 是触发的区域数组，比如 ['face']、['leg']
+      if (hitAreaNames.includes('face')) {
+        model.motion('Tapface')
+      } else if (hitAreaNames.includes('hair')) {
+        model.motion('Taphair')
+      } else if (hitAreaNames.includes('xiongbu')) {
+        model.motion('Tapxiongbu')
+      } else if (hitAreaNames.includes('qunzi')) {
+        model.motion('Tapqunzi')
+      } else if (hitAreaNames.includes('leg')) {
+        model.motion('Tapleg')
+      }
+    })
     //模型的视线聚焦函数清空 
     //model.focus = () => {}
 
@@ -56,7 +76,7 @@ onMounted(async () => {
     model.y = height * 0.75
 
     // ==================== PixiJS v6.x 交互 ====================
-    
+
     // 1. PixiJS v6 开启交互开关的标准写法
     model.interactive = true
 
@@ -67,7 +87,25 @@ onMounted(async () => {
     let dragOffsetY = 0
     let longPressTimer = null
     let isLongPress = false
-
+    // 1. 开启模型的点击交互
+    model.interactive = true
+    //禁止音频
+    SoundManager.play = () => Promise.resolve(undefined)
+    //监听点击区域 hit 事件（SDK 会自动根据 model0.json 里的 HitAreas 进行判定）
+    model.on('hit', (hitAreaNames) => {
+      // hitAreaNames 是触发的区域数组，比如 ['face']、['leg']
+      if (hitAreaNames.includes('face')) {
+        model.motion('Tapface')
+      } else if (hitAreaNames.includes('hair')) {
+        model.motion('Taphair')
+      } else if (hitAreaNames.includes('xiongbu')) {
+        model.motion('Tapxiongbu')
+      } else if (hitAreaNames.includes('qunzi')) {
+        model.motion('Tapqunzi')
+      } else if (hitAreaNames.includes('leg')) {
+        model.motion('Tapleg')
+      }
+    })
     // 指针按下（点击/拖拽开始）
     model.on('pointerdown', (event) => {
       isDragging = true
@@ -118,23 +156,22 @@ onMounted(async () => {
     // 绑定抬起与移出区域事件，防止“漏抬”
     model.on('pointerup', onDragEnd)
     model.on('pointerupoutside', onDragEnd)
-
     // =============================================================
-
   } catch (error) {
     console.error('Live2D 模型加载失败:', error)
   }
   // 核心 2：监听浏览器 resize 事件 自动扩大
   window.addEventListener('resize', handleResize)
-  
+
 })
 //DOM 销毁时
 onUnmounted(() => {
+  //销毁 live2dModel
+  delete window.live2dModel
+
   app?.destroy(true)
   window.removeEventListener('resize', handleResize)
 })
-
-  
 
 
 //气泡坐标为模型中心
@@ -144,27 +181,25 @@ const modelPos = ref({ x: window.innerWidth * 0.8, y: window.innerHeight * 0.75 
 
 <template>
   <!-- 父容器：跟随 Live2D 模型的物理坐标定位 -->
-  <div 
-    ref="wrap" 
-    class="live2d-contain"
-  >
+  <div ref="wrap" class="live2d-contain">
     <!-- 动态气泡：气泡位置中心向上150计量单位 `modelPos.y-150`-->
-    <div class="dialog" :style="{ left: `${modelPos.x+80}px`, top: `${modelPos.y-200}px` }">
+    <div class="dialog" :style="{ left: `${modelPos.x + 80}px`, top: `${modelPos.y - 200}px` }">
       {{ dialogText }}
     </div>
   </div>
 
-  <div class="dom" v-pet-novel="'Ciallo～(∠・ω< )⌒☆'">指我</div>
+  <div class="dom" v-pet-novel="'Ciallo～(∠・ω< )⌒☆'" v-pet-motion="'Tapxiongbu'">指我</div>
 </template>
 
 <style scoped>
 /*清除内边距*/
-body{
-  margin:0;
-  padding:0;
+body {
+  margin: 0;
+  padding: 0;
 }
+
 /*清除容器内边距*/
-.live2d-contain{
+.live2d-contain {
   position: fixed;
   width: 100vw;
   height: 100vh;
@@ -173,11 +208,12 @@ body{
   overflow: hidden;
   z-index: 2;
 }
+
 /**背景框 气泡移动位置差距过大 */
 .dialog {
   width: 200px;
   height: 80px;
-   
+
   display: flex;
   justify-content: center;
   align-items: center;
@@ -193,7 +229,7 @@ body{
   transform: translate(-100%, -100%) translate(-10px, -10px);
 }
 
-.dom{
+.dom {
   width: auto;
   height: 30px;
   background-color: rgb(20, 124, 215);
@@ -202,4 +238,3 @@ body{
   cursor: pointer;
 }
 </style>
-

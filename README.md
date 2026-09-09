@@ -17,11 +17,12 @@
 
 要 提取出标准的 .moc3 和 .json 资源
 
-反编译开源官网 `https://github.com/ihopenot/LpkUnpacker` 
+反编译开源官网 `https://github.com/ihopenot/LpkUnpacker`
 
 拿到的模型文件 放到 public/下 防止被 vite编译 导致失效
 
 建议目录结构
+
 ```
 public/
 └── live2d/
@@ -35,14 +36,16 @@ public/
 │       └── Live2D.vue      # 你的live2d组件
 └── index.html 
 ```
-</details>
 
+</details>
 
 <details>
 <summary>项目构建</summary>
 
 共需: 三额外依赖包 和一个 核心 和 Live2D模型
+
 # 项目安装
+
 `npm create vite@latest` 项目名字 //轻量
 
 `npm create vue@latest` 项目名字  //完整
@@ -56,6 +59,7 @@ npm install pixi.js@7 [npm install pixi.js@6.5.10]
 npm install pixi-live2d-display
 npm install live2dcubismcore
 ```
+
 # 核心下载安装
 
 核心官网 : `https://www.live2d.com/zh-CHS/sdk/download/web/` 这个核心是闭源的
@@ -80,6 +84,7 @@ public/
 PixiJS和  pixi-live2d-display 连通性 会不会库不兼容
 
 试着打印一下
+
 ```
 import * as PIXI from 'pixi.js';
 ///cubism4 第4代核心
@@ -87,7 +92,8 @@ import { Live2DModel } from 'pixi-live2d-display/cubism4';  //第4代 其他几�
 console.log('Pixi版本:', PIXI.VERSION);
 console.log('Live2D模型类:', Live2DModel);
 ```
-# 渲染到画布Canvs上 
+
+# 渲染到画布Canvs上
 
 ```
 <template>
@@ -138,6 +144,7 @@ onUnmounted(()=>{
 })
 </script>
 ```
+
 </details>
 
 <details>
@@ -146,6 +153,7 @@ onUnmounted(()=>{
 live2d的布局位置最怕写死固定
 
 //handleResize() 自定义函数 实现resize监听事件
+
 ```
 // 窗口大小改变时的适配函数
 const handleResize = () => {
@@ -161,6 +169,7 @@ const handleResize = () => {
 ```
 
 //挂载时两量监听浏览器窗口
+
 ```
 onMounted(async()=>{
   const width = window.innerWidth
@@ -175,11 +184,14 @@ onMounted(async()=>{
     height: height
   })
 ```
+
 // 不能固定死 try model舞台设置  同步刷新时候 固定位置 不至于乱跑
+
 ```
     model.x = width * 0.8
     model.y = height * 0.75
 ```
+
 最后 核心 监听浏览器 resize 事件 `window.addEventListener('resize', handleResize)`
 
 最后的最后 unMounted 销毁一下 防止内存溢出
@@ -190,18 +202,14 @@ onMounted(async()=>{
 
 放大没有问题因为 `app.renderer.resize(width, height)` 监听事件会扩大画布的大小，可以自行移动到合适的位置 是不是没有碰撞边界的问题 希望这个需求可以解决
 
-
-
-
 </details>
-
 
 <details>
 <summary>拖拽移动event.data.global</summary>
 
 专有的事件数据对象
 
-`v5 / v6 (当前使用的版本)	event.data.global.x / event.data.global.y` 
+`v5 / v6 (当前使用的版本) event.data.global.x / event.data.global.y`
 
 `v7/v8  pointerdown、pointermove、pointerup 等`
 
@@ -292,15 +300,13 @@ onMounted(async()=>{
   }
 
 ```
-</details>
 
+</details>
 
 <details>
 <summary>边缘碰撞检测（Boundary Limit）</summary>
 
-
 </details>
-
 
 <details>
 <summary>气泡</summary>
@@ -311,6 +317,7 @@ onMounted(async()=>{
 //先把画布坐标传给 Vue，让气泡固定模型中心 || 动态赋予ref() 可随着 live2d一起移动
 const modelPos =ref({x: window.innerWidth * 0.8,y: window.innerHeight * 0.75})
 ```
+
 ```
 //气泡容器 中心向上 150 计量单位 具体位置参考具体模型
 <div class="dialog" :style="{ left: `${modelPos.x}px`, top: `${modelPos.y-150}px` }" ></div>
@@ -325,12 +332,12 @@ const modelPos =ref({x: window.innerWidth * 0.8,y: window.innerHeight * 0.75})
 </details>
 
 <details>
-<summary>字符串绑定DOM元素实现打字效果</summary>
+<summary>DOM元素绑定字符串实现打字效果</summary>
 指令封装 解耦 每个dom绑定事件 很麻烦
 
 极致的解耦:单文件封装 ts文件封装
 
-封装指令的本质就是vue导出一个对象，挂上函数，vue内部在对应的生命周期自动调用这些函数，传入` el、binding、vnode、prevVNode` 参数。
+封装指令的本质就是vue导出一个对象，挂上函数，vue内部在对应的生命周期自动调用这些函数，传入`el、binding、vnode、prevVNode` 参数。
 
 ```
 //引入2种数据类型
@@ -378,11 +385,7 @@ export const vPetNovel: ObjectDirective<PetNovelElement, string | number> = {
   }
 }
 ```
-
-</details>
-
-<details>
-<summary>封装TS实现打字效果</summary>
+*封装TS实现打字机*
 
 跨函数之间的通信 组合式函数 与封装指令文件结合
 
@@ -423,65 +426,72 @@ export function useTypewriter(defaultSpeed = 50) {
 
 *防抖节流打字*
 
-setTimeout(()=>{函数,200})
-
+setTimeout(()=>{()=>{},speed})
 
 </details>
-
 
 <details>
 <summary>DOM元素绑定对应表情</summary>
 
+查看
+
+TODO: 不是怎么暴露不出去啊 绑定表情好像要暴露模型在加载时挂载在windows上的东西
+
+
+```
+model.on('hit', (hitAreaNames) => {
+      // hitAreaNames 是触发的区域数组，比如 ['face']、['leg']
+      if (hitAreaNames.includes('face')) {
+        model.motion('Tapface')
+      } else if (hitAreaNames.includes('hair')) {
+        model.motion('Taphair')
+      } else if (hitAreaNames.includes('xiongbu')) {
+        model.motion('Tapxiongbu')
+      } else if (hitAreaNames.includes('qunzi')) {
+        model.motion('Tapqunzi')
+      } else if (hitAreaNames.includes('leg')) {
+        model.motion('Tapleg')
+      }
+    })
+```
 
 </details>
-
-
 
 <details>
 <summary>接入LLM/agent</summary>
 
-
 <details>
 <summary>结合 TTS(语音合成)</summary>
-
 
 </details>
 
 <details>
 <summary>流式传输(SSE / Stream Output)对应嘴型</summary>
 
-
 </details>
 <details>
 <summary>Agent Function Calling(工具调用)</summary>
-
 
 </details>
 <details>
 <summary>加载角色对应Skills</summary>
 
-
 </details>
 
 </details>
 
-
-
-
-
-
-
-
-![效果预览图](./docs/images/Live2D.png) ![气泡预览图](./docs/images/Live2dDOM.png)
+![效果预览图](./docs/images/Live2D.png) ![气泡预览图](./docs/images/Live2dDOM.png) 
 
 *参考仓库*
 
 `https://github.com/guansss/pixi-live2d-display`
 
+*官方网站*
+
+PIXIJS官网 : `http://www.pixijs.com/`
+
+闭源核心官网 : `https://www.live2d.com/zh-CHS/sdk/download/web/ `
+
 *免责声明*
 
 示例的 Live2D 模型 Shizuku (Cubism 2.1) 和 Haru (Cubism 4) 遵守 Live2D 的 Free Material License
-
-*官方网站*
-
-`http://www.pixijs.com/`

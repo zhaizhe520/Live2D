@@ -28,7 +28,6 @@ export const vPetNovel: ObjectDirective<PetNovelElement, string | number> = {
         }
       }, 200) // 👈 300毫秒延迟，可以根据习惯调大或调小
     }
-
     el._handleMouseLeave = () => {
       // 3. 鼠标离开时，立刻取消未执行的延时打字
       if (el._hoverTimer) {
