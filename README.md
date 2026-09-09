@@ -1,6 +1,3 @@
-参考仓库
-`https://github.com/guansss/pixi-live2d-display`
-
 <details>
 <summary>安装准备</summary>
 
@@ -325,6 +322,8 @@ const modelPos =ref({x: window.innerWidth * 0.8,y: window.innerHeight * 0.75})
 
 极致的解耦:单文件封装
 
+
+
 </details>
 
 <details>
@@ -377,3 +376,14 @@ const modelPos =ref({x: window.innerWidth * 0.8,y: window.innerHeight * 0.75})
 
 ![效果预览图](./docs/images/Live2D.png) ![气泡预览图](./docs/images/Live2dDOM.png)
 
+*参考仓库*
+
+`https://github.com/guansss/pixi-live2d-display`
+
+*免责声明*
+
+示例的 Live2D 模型 Shizuku (Cubism 2.1) 和 Haru (Cubism 4) 遵守 Live2D 的 Free Material License
+
+*官方网站*
+
+`http://www.pixijs.com/`

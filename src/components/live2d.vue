@@ -1,5 +1,9 @@
 <script setup>
-import { ref, onMounted, onUnmounted,computed} from 'vue'
+import { ref, onMounted, onUnmounted,} from 'vue'
+
+// 引入封装好的 TS 文件
+import { vPetNovel, dialogText } from './directives/vPetNovel'
+
 import * as PIXI from 'pixi.js'
 // 重点！！先挂载全局 PIXI，再导入 cubism4
 window.PIXI = PIXI
@@ -19,12 +23,12 @@ const handleResize = () => {
 
   // 2. 动态调整 Pixi 画布的像素大小（重画纸） 画纸不够大了 添加实时画纸
   app.renderer.resize(width, height)  
-  TODO
+  // TODO: 优化实时监听
 }
 //DOM 挂载时
 onMounted(async () => {
   // PIXI.VERSION 版本记录 不同版本 交互逻辑好底层结构发生了很大的变化
-  console.log('当前使用的 PixiJS 版本:',)
+  console.log('当前使用的 PixiJS 版本:',PIXI.VERSION)
   const width = window.innerWidth
   const height = window.innerHeight
   // 创建APP canvas画布大小
@@ -136,7 +140,6 @@ onUnmounted(() => {
 //气泡坐标为模型中心
 const modelPos = ref({ x: window.innerWidth * 0.8, y: window.innerHeight * 0.75 })
 // 气泡默认坐标
-const dialogText = ref("Ciallo～(∠・ω< )⌒☆")
 </script>
 
 <template>
@@ -144,7 +147,6 @@ const dialogText = ref("Ciallo～(∠・ω< )⌒☆")
   <div 
     ref="wrap" 
     class="live2d-contain"
-    :style="TODO"
   >
     <!-- 动态气泡：气泡位置中心向上150计量单位 `modelPos.y-150`-->
     <div class="dialog" :style="{ left: `${modelPos.x+80}px`, top: `${modelPos.y-200}px` }">
@@ -195,6 +197,8 @@ body{
   width: 100px;
   height: 30px;
   background-color: rgb(20, 124, 215);
-
+  position: relative;
+  z-index: 2;
+  cursor: pointer;
 }
 </style>
