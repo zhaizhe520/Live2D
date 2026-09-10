@@ -1,15 +1,22 @@
-// v-pet-motion 指令定义
+// vPetMotion.ts
 export const vPetMotion = {
   mounted(el: HTMLElement, binding: any) {
     let timer: number | null = null
 
     el.addEventListener('mouseenter', () => {
       timer = window.setTimeout(() => {
+
         const model = (window as any).live2dModel
-        // 判断 window 上是否有实例
-        if (model && binding.value) {
-          // 直接调用 SDK 的 motion 方法
-          model.motion(binding.value) 
+
+        if (!model || !binding.value) return
+
+        // 如果传的是数组 ['xxx', 1]
+        if (Array.isArray(binding.value)) {
+          const [group, index] = binding.value
+          model.motion(group, index)
+        } else {
+          // 如果传的是普通字符串 'xxx'
+          model.motion(binding.value)
         }
       }, 300)
     })

@@ -2,11 +2,13 @@
 import type { ObjectDirective, DirectiveBinding } from 'vue'
 //导入打字效果函数 实现函数组合
 import { useTypewriter } from './useTypewriter'
-//暴露 
+//暴露 displayText 实现封装函数之间的相互调用
 export const { displayText: dialogText, typeText } = useTypewriter(50)
 
-const defaultText = ''
-
+const defaultText = '';
+(window as any).setLive2dText = (text: string) => {
+  typeText(text)
+}
 //自定义结构类型
 
 interface PetNovelElement extends HTMLElement {

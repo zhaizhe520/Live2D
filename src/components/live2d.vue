@@ -9,13 +9,12 @@ import * as PIXI from 'pixi.js'
 window.PIXI = PIXI
 import { Live2DModel, SoundManager, } from 'pixi-live2d-display/cubism4'
 
-import {vPetMotion} from "./directives/vPetMotion.ts"
+import { vPetMotion } from "./directives/vPetMotion.ts"
 
 //容器变量
 const wrap = ref(null)
 // app 舞台
 let app = null
-
 // 窗口大小改变时的适配函数
 const handleResize = () => {
   if (!app) return
@@ -44,28 +43,15 @@ onMounted(async () => {
   //响应式渲染canvas到div dom元素里面
   wrap.value.appendChild(app.view)
 
+
   try {
+
+
     const model = await Live2DModel.from('/live2d/murasame/murasame.model3.json');
     app.stage.addChild(model);
-    //暴露给windows
-
+    //动作暴露给windows 表情动作管理
     window.live2dModel = model;
 
-    //默认 Hit Area（碰撞检测区域）与 Motion（动作）绑定逻辑 pixi-live2d-display/cubism4 
-    model.on('hit', (hitAreaNames) => {
-      // hitAreaNames 是触发的区域数组，比如 ['face']、['leg']
-      if (hitAreaNames.includes('face')) {
-        model.motion('Tapface')
-      } else if (hitAreaNames.includes('hair')) {
-        model.motion('Taphair')
-      } else if (hitAreaNames.includes('xiongbu')) {
-        model.motion('Tapxiongbu')
-      } else if (hitAreaNames.includes('qunzi')) {
-        model.motion('Tapqunzi')
-      } else if (hitAreaNames.includes('leg')) {
-        model.motion('Tapleg')
-      }
-    })
     //模型的视线聚焦函数清空 
     //model.focus = () => {}
 
@@ -77,10 +63,17 @@ onMounted(async () => {
 
     // ==================== PixiJS v6.x 交互 ====================
 
+    // 1. 设置全局音量为 0
+    SoundManager.volume = 0
+    // 2. 覆盖播放与加载逻辑
+    SoundManager.play = () => Promise.resolve(undefined)
+    SoundManager.add = () => { }
+
     // 1. PixiJS v6 开启交互开关的标准写法
     model.interactive = true
 
     model.buttonMode = true // 在 v6 里开启鼠标悬浮手型光标
+
     // 状态控制变量
     let isDragging = false
     let dragOffsetX = 0
@@ -89,8 +82,7 @@ onMounted(async () => {
     let isLongPress = false
     // 1. 开启模型的点击交互
     model.interactive = true
-    //禁止音频
-    SoundManager.play = () => Promise.resolve(undefined)
+
     //监听点击区域 hit 事件（SDK 会自动根据 model0.json 里的 HitAreas 进行判定）
     model.on('hit', (hitAreaNames) => {
       // hitAreaNames 是触发的区域数组，比如 ['face']、['leg']
@@ -105,7 +97,46 @@ onMounted(async () => {
       } else if (hitAreaNames.includes('leg')) {
         model.motion('Tapleg')
       }
+    });
+    /*
+    // 监听底层的 motionManager 的 motionStart 事件，单纯打印 JSON 里的 Text
+    model.internalModel.motionManager.on('motionStart', (group, index) => {
+      console.log(`>>> 动作开始触发: Group = ${group}, Index = ${index}`)
+
+      // 1. 获取 JSON 配置
+      const json = model.internalModel?.settings?.json
+
+      // 2. 找到对应动作组里的具体配置列表
+      const motionList = json?.FileReferences?.Motions?.[group] || json?.Motions?.[group]
+      const currentMotion = motionList?.[index]
+
+      // 3. 打印当前动作配置对象
+      console.log('>>> 当前动作的完整配置对象:', currentMotion)
+
+      // 4. 打印台词 Text
+      if (currentMotion && currentMotion.Text) {
+        console.log('>>> [成功获取台词]:', currentMotion.Text)
+      } else {
+        console.log('>>> [注意]: 该动作配置项里没有 Text 字段')
+      }
     })
+      */
+     
+
+    //暴露文本到windows
+    // 监听底层的 motionManager 触发动作并传递 Text
+    model.internalModel.motionManager.on('motionStart', (group, index) => {
+      const json = model.internalModel?.settings?.json
+      const motionList = json?.FileReferences?.Motions?.[group] || json?.Motions?.[group]
+      const currentMotion = motionList?.[index]
+
+      // 如果拿到 Text，直接调用全局暴露的接收函数
+      if (currentMotion && currentMotion.Text) {
+        if (typeof window.setLive2dText === 'function') {
+          window.setLive2dText(currentMotion.Text)
+        }
+      }
+    });
     // 指针按下（点击/拖拽开始）
     model.on('pointerdown', (event) => {
       isDragging = true
@@ -169,6 +200,7 @@ onUnmounted(() => {
   //销毁 live2dModel
   delete window.live2dModel
 
+  delete window.setLive2dText(currentMotion.Text)
   app?.destroy(true)
   window.removeEventListener('resize', handleResize)
 })
@@ -187,8 +219,8 @@ const modelPos = ref({ x: window.innerWidth * 0.8, y: window.innerHeight * 0.75 
       {{ dialogText }}
     </div>
   </div>
-
-  <div class="dom" v-pet-novel="'Ciallo～(∠・ω< )⌒☆'" v-pet-motion="'Tapxiongbu'">指我</div>
+  <!--blinding.value的值-->
+  <div class="dom" v-pet-novel="'Ciallo～(∠・ω< )⌒☆'" v-pet-motion="['Tapxiongbu', 1]">指我</div>
 </template>
 
 <style scoped>

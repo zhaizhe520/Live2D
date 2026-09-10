@@ -5,11 +5,9 @@ export function useTypewriter(defaultSpeed = 50) {
   const displayText = ref<string>('')
   // 2. 内部定时器句柄
   let timer: number | null = null
-
   const typeText = (text: string, speed = defaultSpeed) => {
     // 每次开始新打字前，先清空上一次的定时器
     if (timer) clearInterval(timer)
-
     displayText.value = ''
     
     let index = 0

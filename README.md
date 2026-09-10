@@ -333,6 +333,7 @@ const modelPos =ref({x: window.innerWidth * 0.8,y: window.innerHeight * 0.75})
 
 <details>
 <summary>DOM元素绑定字符串实现打字效果</summary>
+
 指令封装 解耦 每个dom绑定事件 很麻烦
 
 极致的解耦:单文件封装 ts文件封装
@@ -424,9 +425,14 @@ export function useTypewriter(defaultSpeed = 50) {
 }
 ```
 
-*防抖节流打字*
 
-setTimeout(()=>{()=>{},speed})
+```
+Live2D 触发动作 
+  └─► 读取 json 里的 Text
+        └─► 调用 window.setLive2dText(Text)
+              └─► 执行 vPetNovel 里的 typeText(Text)
+                    └─► 更新 dialogText 渲染到气泡
+```
 
 </details>
 
@@ -435,9 +441,11 @@ setTimeout(()=>{()=>{},speed})
 
 查看
 
-TODO: 不是怎么暴露不出去啊 绑定表情好像要暴露模型在加载时挂载在windows上的东西
+TODO: 不是怎么暴露不出去啊 绑定表情好像要暴露模型在加载时挂载在windows上的东西 
 
+把model 挂载在windows上 onMounted(()=>{}) 然后封装指令函数
 
+`  window.live2dModel = model;`
 ```
 model.on('hit', (hitAreaNames) => {
       // hitAreaNames 是触发的区域数组，比如 ['face']、['leg']
@@ -454,6 +462,39 @@ model.on('hit', (hitAreaNames) => {
       }
     })
 ```
+
+```
+// vPetMotion.ts
+export const vPetMotion = {
+  mounted(el: HTMLElement, binding: any) {
+    let timer: number | null = null
+
+    el.addEventListener('mouseenter', () => {
+      timer = window.setTimeout(() => {
+
+        const model = (window as any).live2dModel
+
+        if (!model || !binding.value) return
+
+        // 如果传的是数组 ['xxx', 1]
+        if (Array.isArray(binding.value)) {
+          const [group, index] = binding.value
+          model.motion(group, index)
+        } else {
+          // 如果传的是普通字符串 'xxx'
+          model.motion(binding.value)
+        }
+      }, 300)
+    })
+
+    el.addEventListener('mouseleave', () => {
+      if (timer) clearTimeout(timer)
+    })
+  }
+}
+```
+
+导入引用 v-pet-motion="''"//可以是数组可以是字符串
 
 </details>
 
